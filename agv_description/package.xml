@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>agv_description</name>
+  <version>1.2.6</version>
+  <description>
+    3D models of the AGV for simulation and visualization
+  </description>
+  <license>nun</license>
+  <author email="cindynianx@gmail.com">Cindy</author>
+  <maintainer email="cindynianx@gmail.com">Cindy</maintainer>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+</package>
