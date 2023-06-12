@@ -94,7 +94,7 @@ if __name__=="__main__":
         settings = termios.tcgetattr(sys.stdin)
 
     rospy.init_node('agv_teleop')
-    pub = rospy.Publisher('agv_1/cmd_vel', Twist, queue_size=10)
+    pub = rospy.Publisher('agv_0/cmd_vel', Twist, queue_size=10)
 
     status = 0
     target_linear_vel   = 0.0

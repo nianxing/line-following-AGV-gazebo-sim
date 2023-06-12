@@ -5,7 +5,7 @@
     <link name="base">
 
       <inertial>
-        <pose>0.0 0 0.0 0 0 0</pose>
+        <pose>00.0 0.0 0.12 0 0 0</pose>
         <inertia>
           <ixx>0.001</ixx>
           <ixy>0.000</ixy>
@@ -27,7 +27,7 @@
       </collision>
 
       <visual name="base_visual">
-        <pose>0.0 0 0.05 0 0 0</pose>
+        <pose>0.0 0.0 0.12 0 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://agv_common_meshes/agv.dae</uri>
@@ -39,7 +39,7 @@
 
     <link name="left_wheel">
       <inertial>
-        <pose>0.0 -0.35 0.18 0 0 0</pose>
+        <pose>-0.4 0.0 0.075 1.57 0 0</pose>
         <inertia>
           <ixx>0.001</ixx>
           <ixy>0.000</ixy>
@@ -52,7 +52,7 @@
       </inertial>
 
       <collision name="left_wheel_collision">
-        <pose>0.0 -0.35 0.18 0 0 0</pose>
+        <pose>-0.4 0.0 0.075 1.57 0 0</pose>
         <geometry>
           <cylinder>
             <radius>0.18</radius>
@@ -74,7 +74,7 @@
       </collision>
 
       <visual name="left_wheel_visual">
-        <pose>0.0 -0.35 0.18 0 0 0</pose>
+        <pose>-0.4 0.0 0.075 1.57 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://agv_common_meshes/wheel.dae</uri>
@@ -86,7 +86,7 @@
 
     <link name="right_wheel">
       <inertial>
-        <pose>0.0 0.35 0.18 0 0 0</pose>
+        <pose>0.3 0.0 0.075 -1.57 0 0</pose>
         <inertia>
           <ixx>0.001</ixx>
           <ixy>0.000</ixy>
@@ -99,7 +99,7 @@
       </inertial>
     
       <collision name="right_wheel_collision">
-        <pose>0.0 0.35 0.18 0 0 0</pose>
+        <pose>0.3 0.0 0.075 -1.57 0 0</pose>
         <geometry>
           <cylinder>
             <radius>0.18</radius>
@@ -121,7 +121,7 @@
       </collision>
 
       <visual name="right_wheel_visual">
-        <pose>0.0 0.35 0.18 0 0 0</pose>
+        <pose>0.3 0.0 0.075 -1.57 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://agv_common_meshes/wheel.dae</uri>
@@ -134,9 +134,9 @@
     <joint name="left_wheel_joint" type="revolute">
       <parent>base</parent>
       <child>left_wheel</child>
-      <pose>0.0 -0.35 0.18 0 0 0</pose>
+      <pose>-0.4 0.0 0.075 1.57 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 0 1</xyz>
       </axis>
     </joint>
 
@@ -145,7 +145,7 @@
       <child>right_wheel</child>
       <pose>0.0 0.35 0.18 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 0 1</xyz>
       </axis>
     </joint>
 
