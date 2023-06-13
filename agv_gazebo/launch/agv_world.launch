@@ -1,0 +1,30 @@
+<launch>
+  <arg name="first_agv"  default="agv_0"/>
+
+  <arg name="first_agv_x_pos" default="-0.85"/>
+  <arg name="first_agv_y_pos" default="0.0"/>
+  <arg name="first_agv_z_pos" default=" 0.0"/>
+  <arg name="first_agv_yaw"   default=" 1.57"/>
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find agv_gazebo)/worlds/agv_line_following.world" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>  
+
+  <group ns = "$(arg first_agv)">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder  $(find agv_description)/urdf/agv_for_line_following.urdf.xacro" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="tf_prefix" value="$(arg first_agv)" />
+    </node>
+    
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg first_agv) -x $(arg first_agv_x_pos) -y $(arg first_agv_y_pos) -z $(arg first_agv_z_pos) -Y $(arg first_agv_yaw) -param robot_description" />
+  </group>
+
+</launch>
