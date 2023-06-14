@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from turtle import st
 import rospy
 import math
 from geometry_msgs.msg import Twist
@@ -23,11 +24,11 @@ Zone_2 = (-1.5, -1.5, 3, 0)
 # global parameters for zones, 
 # bottom-left and top-right,(x1, y1, x2, y2)
 # corners of rectangle.
-marker_1 = (-0.9, -2.05, -0.8, -1.95)
-marker_2 = (-0.9, -1.05, -0.8, -0.95)
-marker_3 = (-0.9, -0.05, -0.8, 0.05)
-marker_4 = (-0.9, 0.95, -0.8, 1.05)
-marker_5 = (-0.9, 1.95, -0.8, 2.05)
+marker_1 = (-1, -2.05, -0.6, -1.95)
+marker_2 = (-1, -1.05, -0.6, -0.95)
+marker_3 = (-1, -0.05, -0.6, 0.05)
+marker_4 = (-1, 0.95, -0.6, 1.05)
+marker_5 = (-1, 1.95, -0.6, 2.05)
 
 # hack:
 # global parameters for route, should be replaced when line detection function is implemented.
@@ -61,7 +62,8 @@ class LineFollowing():
 
     def get_park_command(self):
         park_command = 0
-        park_command = rospy.wait_for_message('/park', Int16)
+        park_msg = rospy.wait_for_message('/park', Int16)
+        park_command = park_msg.data
         return park_command
     
     def in_rectangle(self,x1, y1, x2, y2, x, y):
@@ -203,10 +205,63 @@ class LineFollowing():
 
         return 0, 0
     
-    def parking_drive(self, current_route, agv_odom, park_command):
-        steer = 0
-
-        return steer
+    def parking_drive(self, agv_odom, park_command):
+        vel = 0.0
+        steer = 0.0
+        if(agv_odom.pose.pose.position.x>-2):
+            if(park_command == 1):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>-1):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y<-1):
+                    steer = -0.1
+                else:
+                    steer = 0
+            elif(park_command == 2):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>0):
+                    steer = -0.1
+                elif (agv_odom.pose.pose.position.y<0):
+                    steer = 0.1
+                else:
+                    steer = 0
+            elif(park_command == 3):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>1):
+                    steer = -0.1
+                elif (agv_odom.pose.pose.position.y<1):
+                    steer = 0.1
+                else:
+                    steer = 0
+            elif(park_command == 4):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>2):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y<2):
+                    steer = -0.1
+                else:
+                    steer = 0
+            elif(park_command == 5):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>3):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y<3):
+                    steer = -0.1
+                else:
+                    steer = 0
+            return vel, steer 
+        else:
+            return vel, steer
 
     def line_following(self):
         twist = Twist()
@@ -215,24 +270,30 @@ class LineFollowing():
         while not rospy.is_shutdown():
             agv_odom = self.get_odom()
             #print(agv_odom)
-            #park_command = self.get_park_command()
+            park_command = self.get_park_command()
+            #rospy.loginfo('park_command: ')
+            #rospy.loginfo(park_command)
             has_marker, current_marker = self.check_marker(agv_odom)
-            current_speed = self.check_speed_zone(agv_odom)
-            twist.linear.x = current_speed
+            #rospy.loginfo('current_marker: ')
+            #rospy.loginfo(current_marker)
+            #current_speed = self.check_speed_zone(agv_odom)
+            #twist.linear.x = current_speed
             # hack: should be replaced when the marker detect module is implemented.
             current_route = self.check_current_route(agv_odom)
             if (park_command == 0):
                 twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
-                rospy.loginfo('twist.angular.z: ')
-                rospy.loginfo(twist.angular.z)
+                #rospy.loginfo('twist.angular.z: ')
+                #rospy.loginfo(twist.angular.z)
                 self._cmd_pub.publish(twist)
                 rospy.loginfo('agv 0 is running on track')
             else:
                 if(park_command == current_marker or Parking):
-                    twist.angular.z = self.parking_drive(agv_odom, park_command)
-                    Parking == True
+                    rospy.loginfo('in parking drive: ')
+                    rospy.loginfo(park_command)
+                    twist.linear.x,twist.angular.z = self.parking_drive(agv_odom, park_command)
+                    Parking = True
                 else:
-                    twist.angular.z = self.normal_drive(current_route, agv_odom)
+                    twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
                 self._cmd_pub.publish(twist)
 
 

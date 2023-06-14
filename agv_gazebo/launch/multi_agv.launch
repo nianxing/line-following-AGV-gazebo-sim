@@ -1,18 +1,34 @@
 <launch>
   <arg name="first_agv"  default="agv_0"/>
   <arg name="second_agv" default="agv_1"/>
-
+  <arg name="third_agv" default="agv_2"/>
+  <arg name="fourth_agv" default="agv_3"/>
+  <arg name="fifth_agv" default="agv_4"/>
 
   <arg name="first_agv_x_pos" default="-0.85"/>
   <arg name="first_agv_y_pos" default="0.0"/>
   <arg name="first_agv_z_pos" default=" 0.0"/>
-  <arg name="first_agv_yaw"   default=" 0"/>
+  <arg name="first_agv_yaw"   default=" 1.57"/>
 
-  <arg name="second_agv_x_pos" default=" 1.65"/>
+  <arg name="second_agv_x_pos" default=" 1.5"/>
   <arg name="second_agv_y_pos" default=" 0.0"/>
   <arg name="second_agv_z_pos" default=" 0.0"/>
-  <arg name="second_agv_yaw"   default=" 0"/>
+  <arg name="second_agv_yaw"   default=" 1.57"/>
 
+  <arg name="third_agv_x_pos" default="-0.85"/>
+  <arg name="third_agv_y_pos" default="1.0"/>
+  <arg name="third_agv_z_pos" default=" 0.0"/>
+  <arg name="third_agv_yaw"   default=" 1.57"/>
+
+  <arg name="fourth_agv_x_pos" default="-0.85"/>
+  <arg name="fourth_agv_y_pos" default="-1.0"/>
+  <arg name="fourth_agv_z_pos" default=" 0.0"/>
+  <arg name="fourth_agv_yaw"   default=" 1.57"/>
+
+  <arg name="fifth_agv_x_pos" default="-0.85"/>
+  <arg name="fifth_agv_y_pos" default=" 2.0"/>
+  <arg name="fifth_agv_z_pos" default=" 0.0"/>
+  <arg name="fifth_agv_yaw"   default=" 1.57"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find agv_gazebo)/worlds/agv_line_following.world" />
@@ -43,6 +59,39 @@
     </node>
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg second_agv) -x $(arg second_agv_x_pos) -y $(arg second_agv_y_pos) -z $(arg second_agv_z_pos) -Y $(arg second_agv_yaw) -param robot_description" />
+  </group>
+
+  <group ns = "$(arg third_agv)">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder  $(find agv_description)/urdf/agv_for_line_following.urdf.xacro" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="tf_prefix" value="$(arg third_agv)" />
+    </node>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg third_agv) -x $(arg third_agv_x_pos) -y $(arg third_agv_y_pos) -z $(arg third_agv_z_pos) -Y $(arg third_agv_yaw) -param robot_description" />
+  </group>
+
+  <group ns = "$(arg fourth_agv)">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder  $(find agv_description)/urdf/agv_for_line_following.urdf.xacro" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="tf_prefix" value="$(arg fourth_agv)" />
+    </node>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg fourth_agv) -x $(arg fourth_agv_x_pos) -y $(arg fourth_agv_y_pos) -z $(arg fourth_agv_z_pos) -Y $(arg fourth_agv_yaw) -param robot_description" />
+  </group>
+
+  <group ns = "$(arg fifth_agv)">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder  $(find agv_description)/urdf/agv_for_line_following.urdf.xacro" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="tf_prefix" value="$(arg fifth_agv)" />
+    </node>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model $(arg fifth_agv) -x $(arg fifth_agv_x_pos) -y $(arg fifth_agv_y_pos) -z $(arg fifth_agv_z_pos) -Y $(arg fifth_agv_yaw) -param robot_description" />
   </group>
 
 </launch>

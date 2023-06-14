@@ -23,11 +23,11 @@ Zone_2 = (-1.5, -1.5, 3, 0)
 # global parameters for zones, 
 # bottom-left and top-right,(x1, y1, x2, y2)
 # corners of rectangle.
-marker_1 = (-0.9, -2.05, -0.8, -1.95)
-marker_2 = (-0.9, -1.05, -0.8, -0.95)
-marker_3 = (-0.9, -0.05, -0.8, 0.05)
-marker_4 = (-0.9, 0.95, -0.8, 1.05)
-marker_5 = (-0.9, 1.95, -0.8, 2.05)
+marker_1 = (-1, -2.05, -0.6, -1.95)
+marker_2 = (-1, -1.05, -0.6, -0.95)
+marker_3 = (-1, -0.05, -0.6, 0.05)
+marker_4 = (-1, 0.95, -0.6, 1.05)
+marker_5 = (-1, 1.95, -0.6, 2.05)
 
 # hack:
 # global parameters for route, should be replaced when line detection function is implemented.
@@ -50,6 +50,13 @@ route_7 = (-0.85, 1.9335, -2.7534, 1.9335)
 # park 5
 route_8 = (-0.85, 2.9335, -2.7534, 2.9335)
 
+
+Parking_0 = False
+Parking_1 = False
+Parking_2 = False
+Parking_3 = False
+Parking_4 = False
+
 class LineFollowing():
     def __init__(self):
         self._cmd_pub_0 = rospy.Publisher('agv_0/cmd_vel', Twist, queue_size=1)
@@ -69,11 +76,11 @@ class LineFollowing():
 
     def get_park_command(self):
         park_command_0 = park_command_1 = park_command_2 = park_command_3 = park_command_4 = 0
-        park_command_0 = rospy.wait_for_message('/park_0', Int16)
-        park_command_1 = rospy.wait_for_message('/park_0', Int16)
-        park_command_2 = rospy.wait_for_message('/park_0', Int16)
-        park_command_3 = rospy.wait_for_message('/park_0', Int16)
-        park_command_4 = rospy.wait_for_message('/park_0', Int16)
+        park_command_0 = rospy.wait_for_message('/park_agv_0', Int16)
+        park_command_1 = rospy.wait_for_message('/park_agv_1', Int16)
+        park_command_2 = rospy.wait_for_message('/park_agv_2', Int16)
+        park_command_3 = rospy.wait_for_message('/park_agv_3', Int16)
+        park_command_4 = rospy.wait_for_message('/park_agv_4', Int16)
         return park_command_0, park_command_1, park_command_2, park_command_3, park_command_4
     
     def in_rectangle(self,x1, y1, x2, y2, x, y):
@@ -215,37 +222,184 @@ class LineFollowing():
 
         return 0, 0
     
-    def parking_drive(self, current_route, agv_odom, park_command):
-        steer = 0
+    def parking_drive(self, agv_odom, park_command):
+        vel = 0.0
+        steer = 0.0
+        if(agv_odom.pose.pose.position.x>-2):
+            if(park_command == 1):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>-1):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y<-1):
+                    steer = -0.1
+                else:
+                    steer = 0
+            elif(park_command == 2):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>0):
+                    steer = -0.1
+                elif (agv_odom.pose.pose.position.y<0):
+                    steer = 0.1
+                else:
+                    steer = 0
+            elif(park_command == 3):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>1):
+                    steer = -0.1
+                elif (agv_odom.pose.pose.position.y<1):
+                    steer = 0.1
+                else:
+                    steer = 0
+            elif(park_command == 4):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>2):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y<2):
+                    steer = -0.1
+                else:
+                    steer = 0
+            elif(park_command == 5):
+                vel = 0.1
+                if (agv_odom.pose.pose.position.x>=-1.5):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y>3):
+                    steer = 0.1
+                elif (agv_odom.pose.pose.position.y<3):
+                    steer = -0.1
+                else:
+                    steer = 0
+            return vel, steer 
+        else:
+            return vel, steer
 
-        return steer
+    def drive_agv0(self,agv_odom, park_command):
+        global Parking_0
+        twist = Twist()
+        current_route = self.check_current_route(agv_odom)  
+        has_marker, current_marker = self.check_marker(agv_odom)
+        if (park_command == 0):
+            twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+            #rospy.loginfo('twist.angular.z: ')
+            #rospy.loginfo(twist.angular.z)
+            #rospy.loginfo('agv 0 is running on track')
+        else:
+            if(park_command == current_marker or Parking_0):
+                #rospy.loginfo('in parking drive: ')
+                #rospy.loginfo(park_command)
+                twist.linear.x,twist.angular.z = self.parking_drive(agv_odom, park_command)
+                Parking_0 = True
+            else:
+                twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+                
+        self._cmd_pub_0.publish(twist)
+    
+    def drive_agv1(self,agv_odom, park_command):
+        global Parking_1
+        twist = Twist()
+        current_route = self.check_current_route(agv_odom)  
+        has_marker, current_marker = self.check_marker(agv_odom)
+        if (park_command == 0):
+            twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+            #rospy.loginfo('twist.angular.z: ')
+            #rospy.loginfo(twist.angular.z)
+            #rospy.loginfo('agv 0 is running on track')
+        else:
+            if(park_command == current_marker or Parking_1):
+                #rospy.loginfo('in parking drive: ')
+                #rospy.loginfo(park_command)
+                twist.linear.x,twist.angular.z = self.parking_drive(agv_odom, park_command)
+                Parking_1 = True
+            else:
+                twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+        self._cmd_pub_1.publish(twist)
+    
+    def drive_agv2(self,agv_odom, park_command):
+        global Parking_2
+        twist = Twist()
+        current_route = self.check_current_route(agv_odom)  
+        has_marker, current_marker = self.check_marker(agv_odom)
+        if (park_command == 0):
+            twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+            #rospy.loginfo('twist.angular.z: ')
+            #rospy.loginfo(twist.angular.z)
+            #rospy.loginfo('agv 0 is running on track')
+        else:
+            if(park_command == current_marker or Parking_2):
+                #rospy.loginfo('in parking drive: ')
+                #rospy.loginfo(park_command)
+                twist.linear.x,twist.angular.z = self.parking_drive(agv_odom, park_command)
+                Parking_2 = True
+            else:
+                twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+        self._cmd_pub_2.publish(twist)
+    
+    def drive_agv3(self,agv_odom, park_command):
+        global Parking_3
+        twist = Twist()
+        current_route = self.check_current_route(agv_odom)  
+        has_marker, current_marker = self.check_marker(agv_odom)
+        if (park_command == 0):
+            twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+            #rospy.loginfo('twist.angular.z: ')
+            #rospy.loginfo(twist.angular.z)
+            #rospy.loginfo('agv 0 is running on track')
+        else:
+            if(park_command == current_marker or Parking_3):
+                #rospy.loginfo('in parking drive: ')
+                #rospy.loginfo(park_command)
+                twist.linear.x,twist.angular.z = self.parking_drive(agv_odom, park_command)
+                Parking_3 = True
+            else:
+                twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+        self._cmd_pub_3.publish(twist)
+
+    def drive_agv4(self,agv_odom, park_command):
+        global Parking_4
+        twist = Twist()
+        current_route = self.check_current_route(agv_odom)  
+        has_marker, current_marker = self.check_marker(agv_odom)
+        if (park_command == 0):
+            twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+            #rospy.loginfo('twist.angular.z: ')
+            #rospy.loginfo(twist.angular.z)
+            #rospy.loginfo('agv 0 is running on track')
+        else:
+            if(park_command == current_marker or Parking_4):
+                #rospy.loginfo('in parking drive: ')
+                #rospy.loginfo(park_command)
+                twist.linear.x,twist.angular.z = self.parking_drive(agv_odom, park_command)
+                Parking_4 = True
+            else:
+                twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
+        print("agv 4")
+        print(twist)
+        self._cmd_pub_4.publish(twist)
 
     def line_following(self):
-        twist = Twist()
-        Parking = False
-        park_command = 0
+        park_command_0 = 0
+        park_command_1 = 0
+        park_command_2 = 0
+        park_command_3 = 0
+        park_command_4 = 0
+
         while not rospy.is_shutdown():
-            agv_odom = self.get_odom()
-            #print(agv_odom)
-            #park_command = self.get_park_command()
-            has_marker, current_marker = self.check_marker(agv_odom)
-            current_speed = self.check_speed_zone(agv_odom)
-            twist.linear.x = current_speed
-            # hack: should be replaced when the marker detect module is implemented.
-            current_route = self.check_current_route(agv_odom)
-            if (park_command == 0):
-                twist.linear.x, twist.angular.z = self.normal_drive(current_route, agv_odom)
-                rospy.loginfo('twist.angular.z: ')
-                rospy.loginfo(twist.angular.z)
-                self._cmd_pub.publish(twist)
-                rospy.loginfo('agv 0 is running on track')
-            else:
-                if(park_command == current_marker or Parking):
-                    twist.angular.z = self.parking_drive(agv_odom, park_command)
-                    Parking == True
-                else:
-                    twist.angular.z = self.normal_drive(current_route, agv_odom)
-                self._cmd_pub.publish(twist)
+            agv_odom_0, agv_odom_1, agv_odom_2, agv_odom_3, agv_odom_4 = self.get_odom()
+            #print(agv_odom_0)
+            #park_command_0,park_command_1,park_command_2,park_command_3,park_command_4 = self.get_park_command()
+
+            self.drive_agv0(agv_odom_0, park_command_0)
+            self.drive_agv1(agv_odom_1, park_command_1)
+            self.drive_agv2(agv_odom_2, park_command_2)
+            self.drive_agv3(agv_odom_3, park_command_3)
+            self.drive_agv4(agv_odom_4, park_command_4)
 
 
 def main():
